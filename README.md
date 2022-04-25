@@ -44,7 +44,7 @@ With the last command you just opened r, so you can run the follows command to i
 
 Note: q() is to close the "r console".
 
-just open main.ipynb and run all cells. Any packages or depencies will be added as the project grows.
+Just open main.ipynb and run all cells. Any packages or depencies will be added as the project grows.
 Future scope -:
 1) Apply NN(Neural Network)
 2) Make GUI application using tkinter
