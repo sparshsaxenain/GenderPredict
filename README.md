@@ -4,30 +4,40 @@ Major Project to recognise gender of a person using thier voice in real-time
 install required libraries -:
 ```ruby
 $ sudo apt install python3-pip
-
+```
+```ruby
 $ pip install pandas
-
+```
+```ruby
 $ pip install sklearn
-
+```
+```ruby
 $ pip install catboost
-
+```
+```ruby
 $ pip install xgboost
-
+```
+```ruby
 $ sudo apt-get install libportaudio2
-
+```
+```ruby
 $ pip install sounddevice
-
+```
+```ruby
 $ pip install scipy
-
+```
+```ruby
 $ pip install numpy
 ```
 
 Install R -:
 ```ruby
 $ sudo apt install r-base
-
+```
+```ruby
 $ sudo apt install gfortran libsndfile1-dev libfftw3-dev
-
+```
+```ruby
 $ R
 ```
 
