@@ -59,5 +59,5 @@ Just open main.ipynb and run all cells. Any packages or depencies will be added 
 
 Future scope -:
 1) Apply NN(Neural Network)
-2) Make GUI application using tkinter
-3) Perform feature selection
+2) ~~Make GUI application using tkinter~~
+3) ~~Perform feature selection~~
