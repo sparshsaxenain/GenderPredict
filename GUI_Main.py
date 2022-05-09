@@ -4,8 +4,19 @@ from tkinter.ttk import *
 from tkinter.filedialog import askopenfile
 import os
 import pickle
+from tracemalloc import is_tracing
 import pandas as pd
 import webbrowser
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import MinMaxScaler
+from catboost import CatBoostClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import VotingClassifier
+from xgboost import XGBClassifier
+from sklearn.metrics import confusion_matrix,ConfusionMatrixDisplay
+from sklearn import metrics
 
 root = Tk()
 
@@ -30,7 +41,8 @@ photo1_label.pack()
 Heading = Label(text = "Gender Recognition Using Voice",font=('Helvetica', 22, 'bold'))
 Heading.pack(pady=45)
 
-global predicted_gender
+global is_train
+is_train = 0
 #RECORDING VOICE
 def record(event):
     import sounddevice as sd
@@ -53,7 +65,7 @@ def record(event):
     write('/home/sparsh/pyvscode/Major_Project/GenderPredict-main/output1.wav', fs, myrecording)  # Save as WAV file
 
 Record_png = PhotoImage(file = "/home/sparsh/pyvscode/Major_Project/GenderPredict-main/Resources/record.png")
-Record_button = Button(root, text = 'Click Me !', image = Record_png)
+Record_button = Button(root, text = 'Click Me !', image = Record_png,cursor="hand2")
 Record_button.pack()
 Record_button.bind('<Button-1>',record)
 
@@ -76,7 +88,7 @@ def open_file():
 
 upload_frame = Frame(root,borderwidth=2)
 upload_frame.pack()
-upload_button = Button(upload_frame,text = 'Choose File',command=lambda:open_file())
+upload_button = Button(upload_frame,text = 'Choose File',command=lambda:open_file(),cursor="hand2")
 upload_button.pack()
 upload_label = Label(upload_frame,text = 'Upload audio in wav format')
 upload_label.pack()
@@ -113,7 +125,7 @@ predict_button.bind('<Button-1>',predict)
 #relief - border styling - sunken , raised , groove , ridge
 
 #IF PREDICTION IS CORRECT WE WILL SAVE THE VOICE FEATURES AND SAVE TO DATAFRAME
-def save_and_train(event):
+def save(event):
     for widgets in correct_frame.winfo_children():
         widgets.destroy()
     import csv
@@ -138,14 +150,59 @@ def save_and_train(event):
         writer_object.writerow(list_of_csv[1])
         f_object.close()
     saved = Label(correct_frame,text = "Saved Thank You!",font=('comicsans', 22, 'bold'))
+    is_train = 1
     saved.pack()
+
 correct_frame = Frame(root,borderwidth=2)
 correct_frame.pack()
 correct_label = Label(correct_frame,text="*Please click the save button if the prediction is correct*")
 correct_label.pack()
 correct_button = Button(correct_frame,text = "Save")
 correct_button.pack()
-correct_button.bind('<Button-1>',save_and_train)
+correct_button.bind('<Button-1>',save)
+
+#TRAIN NEW MODEL
+def train_model(event):
+    for widgets in train_frame.winfo_children():
+        widgets.destroy()
+    df = pd.read_csv('/home/sparsh/pyvscode/Major_Project/GenderPredict-main/voice.csv')
+    encoding_columns = [ "label"]
+    Encoder = LabelEncoder()
+    for column in encoding_columns :
+        df[ column ] = Encoder.fit_transform(tuple(df[ column ]))
+        df = df.drop('centroid',axis=1)
+        df = df.drop('maxdom',axis=1)
+        x = df.drop("label",axis=1)
+        y = df["label"]
+        X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=2)
+        cat = CatBoostClassifier()
+        randomforest =RandomForestClassifier()
+        xgb = XGBClassifier()
+        lgr = LogisticRegression()
+        estimator = []
+        estimator.append(('catboost',cat))
+        estimator.append(('randomforest',randomforest))
+        estimator.append(('xgb',xgb))
+        estimator.append(('lgr',lgr))
+        voting = VotingClassifier(estimators= estimator,voting ='soft')
+        wait = Label(train_frame,text="Wait")
+        wait.pack()
+        voting.fit(X_train,y_train)
+        y_pred = voting.predict(X_test)
+        accu = metrics.accuracy_score(y_test,y_pred)
+        for widgets in train_frame.winfo_children():
+            widgets.destroy()
+        accu_label = Label(train_frame,text="accuracy = "+str(accu*100))
+        accu_label.pack()
+        file_name = 'finalized_model.sav'
+        pickle.dump(voting, open(file_name,'wb'))
+train_frame = Frame(root)
+train_frame.pack()
+train_label = Label(train_frame,text = "Click the button below to train on the new dataset")
+train_label.pack()
+train_button = Button(train_frame,text = "Train")
+train_button.pack()
+train_button.bind('<Button-1>',train_model)
 
 
 #BOTTOM
