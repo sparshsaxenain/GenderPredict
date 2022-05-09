@@ -3,42 +3,42 @@ Major Project to recognise gender of a person using thier voice in real-time
 
 install required libraries -:
 ```ruby
-$ sudo apt install python3-pip
+sudo apt install python3-pip
 ```
 ```ruby
-$ pip install pandas
+pip install pandas
 ```
 ```ruby
-$ pip install sklearn
+pip install sklearn
 ```
 ```ruby
-$ pip install catboost
+pip install catboost
 ```
 ```ruby
-$ pip install xgboost
+pip install xgboost
 ```
 ```ruby
-$ sudo apt-get install libportaudio2
+sudo apt-get install libportaudio2
 ```
 ```ruby
-$ pip install sounddevice
+pip install sounddevice
 ```
 ```ruby
-$ pip install scipy
+pip install scipy
 ```
 ```ruby
-$ pip install numpy
+pip install numpy
 ```
 
 Install R -:
 ```ruby
-$ sudo apt install r-base
+sudo apt install r-base
 ```
 ```ruby
-$ sudo apt install gfortran libsndfile1-dev libfftw3-dev
+sudo apt install gfortran libsndfile1-dev libfftw3-dev
 ```
 ```ruby
-$ R
+R
 ```
 
 With the last command you just opened r, so you can run the follows command to install packages:
