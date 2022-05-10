@@ -23,7 +23,7 @@ root = Tk()
 root.title('Major Project')
 
 #width x height
-root.geometry("1280x720")
+root.geometry("1280x800")
 
 #width,height
 root.minsize(1280,720)
@@ -62,7 +62,7 @@ def record(event):
         widgets.destroy()
     Recorded = Label(record_frame,text = "Recording Done!")
     Recorded.pack()
-    write('/home/sparsh/pyvscode/Major_Project/GenderPredict-main/output1.wav', fs, myrecording)  # Save as WAV file
+    write('/home/sparsh/pyvscode/Major_Project/GenderPredict-main/output.wav', fs, myrecording)  # Save as WAV file
 
 Record_png = PhotoImage(file = "/home/sparsh/pyvscode/Major_Project/GenderPredict-main/Resources/record.png")
 Record_button = Button(root, text = 'Click Me !', image = Record_png,cursor="hand2")
@@ -76,11 +76,13 @@ record_text.pack()
 
 #UPLOAD FILE
 def open_file():
+    for widgets in loc_frame.winfo_children():
+        widgets.destroy()
     global file
     file = askopenfile(filetypes=[('Waveform Audio File', '*wav')])
     if file is not None:
         filepath = os.path.abspath(file.name)
-        location = Label(upload_frame,text='File Chosen: '+ str(filepath))
+        location = Label(loc_frame,text='File Chosen: '+ str(filepath))
         location.pack()
         src = str(filepath)
         dst = "/home/sparsh/pyvscode/Major_Project/GenderPredict-main/output.wav"
@@ -92,10 +94,12 @@ upload_button = Button(upload_frame,text = 'Choose File',command=lambda:open_fil
 upload_button.pack()
 upload_label = Label(upload_frame,text = 'Upload audio in wav format')
 upload_label.pack()
+loc_frame = Frame(root)
+loc_frame.pack()
 
 #PREDICTION
 def predict(event):
-    for widgets in predict_frame.winfo_children():
+    for widgets in prediction_frame.winfo_children():
         widgets.destroy()
     model = pickle.load(open('/home/sparsh/pyvscode/Major_Project/GenderPredict-main/finalized_model.sav', 'rb'))
     os.chdir('/home/sparsh/pyvscode/Major_Project/GenderPredict-main/')
@@ -105,10 +109,10 @@ def predict(event):
     voice = voice.drop('maxdom',axis=1)
     gender = model.predict(voice)
     if(gender[0] == 0):
-        prediction = Label(predict_frame,text="Female",font=('comicsans', 22, 'bold'))
+        prediction = Label(prediction_frame,text="Female",font=('comicsans', 22, 'bold'))
         prediction.pack()
     else:
-        prediction = Label(predict_frame,text = "Male",font=('comicsans', 22, 'bold'))
+        prediction = Label(prediction_frame,text = "Male",font=('comicsans', 22, 'bold'))
         prediction.pack()
 
 predict_frame = Frame(root, borderwidth=6)
@@ -116,6 +120,8 @@ predict_frame.pack()
 predict_button = Button(predict_frame,text = 'Predict Gender')
 predict_button.pack()
 predict_button.bind('<Button-1>',predict)
+prediction_frame = Label(root)
+prediction_frame.pack()
 #Important Label Options
 #text - add the text
 #bd - background
@@ -126,7 +132,7 @@ predict_button.bind('<Button-1>',predict)
 
 #IF PREDICTION IS CORRECT WE WILL SAVE THE VOICE FEATURES AND SAVE TO DATAFRAME
 def save(event):
-    for widgets in correct_frame.winfo_children():
+    for widgets in saved_frame.winfo_children():
         widgets.destroy()
     import csv
     from csv import writer
@@ -149,8 +155,10 @@ def save(event):
         writer_object = writer(f_object)
         writer_object.writerow(list_of_csv[1])
         f_object.close()
-    saved = Label(correct_frame,text = "Saved Thank You!",font=('comicsans', 22, 'bold'))
-    is_train = 1
+    df=pd.read_csv("/home/sparsh/pyvscode/Major_Project/GenderPredict-main/voice.csv")
+    df.drop_duplicates(subset=["meanfreq","sd","median","Q25","Q75","IQR","skew","kurt","sp.ent","sfm","mode","centroid","meanfun","minfun","maxfun","meandom","mindom","maxdom","dfrange","modindx","label"],keep='last',inplace=True)
+    df.to_csv("/home/sparsh/pyvscode/Major_Project/GenderPredict-main/voice.csv",index=False)
+    saved = Label(saved_frame,text = "Saved Thank You!",font=('comicsans', 22, 'bold'))
     saved.pack()
 
 correct_frame = Frame(root,borderwidth=2)
@@ -160,10 +168,12 @@ correct_label.pack()
 correct_button = Button(correct_frame,text = "Save")
 correct_button.pack()
 correct_button.bind('<Button-1>',save)
+saved_frame = Frame(root)
+saved_frame.pack()
 
 #TRAIN NEW MODEL
 def train_model(event):
-    for widgets in train_frame.winfo_children():
+    for widgets in accurate_frame.winfo_children():
         widgets.destroy()
     df = pd.read_csv('/home/sparsh/pyvscode/Major_Project/GenderPredict-main/voice.csv')
     encoding_columns = [ "label"]
@@ -178,21 +188,17 @@ def train_model(event):
         cat = CatBoostClassifier()
         randomforest =RandomForestClassifier()
         xgb = XGBClassifier()
-        lgr = LogisticRegression()
+        lgr = LogisticRegression(max_iter=7200)
         estimator = []
         estimator.append(('catboost',cat))
         estimator.append(('randomforest',randomforest))
         estimator.append(('xgb',xgb))
         estimator.append(('lgr',lgr))
         voting = VotingClassifier(estimators= estimator,voting ='soft')
-        wait = Label(train_frame,text="Wait")
-        wait.pack()
         voting.fit(X_train,y_train)
         y_pred = voting.predict(X_test)
         accu = metrics.accuracy_score(y_test,y_pred)
-        for widgets in train_frame.winfo_children():
-            widgets.destroy()
-        accu_label = Label(train_frame,text="accuracy = "+str(accu*100))
+        accu_label = Label(accurate_frame,text="accuracy = "+str(accu*100))
         accu_label.pack()
         file_name = 'finalized_model.sav'
         pickle.dump(voting, open(file_name,'wb'))
@@ -203,6 +209,8 @@ train_label.pack()
 train_button = Button(train_frame,text = "Train")
 train_button.pack()
 train_button.bind('<Button-1>',train_model)
+accurate_frame = Frame(root)
+accurate_frame.pack()
 
 
 #BOTTOM
