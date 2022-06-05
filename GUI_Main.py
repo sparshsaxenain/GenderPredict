@@ -87,6 +87,13 @@ def open_file():
         src = str(filepath)
         dst = "/home/sparsh/pyvscode/Major_Project/GenderPredict-main/output.wav"
         shutil.copyfile(src,dst)
+    else:
+        location = Label(loc_frame,text="No file chosen, will predict on default input")
+        location.pack()
+        lst = [[0.150714870272026,0.0934505709407126,0.135160905840286,0.116138259833135,0.255303933253874,0.139165673420739,9.1591921895223,130.723983084199,0.841194677060582,0.368962802950422,0,0.150714870272026,0.131586830120106,0.0431506849315069,0.279113924050633,0.0692554370777027,0,0.624462890625,0.624462890625,0.0926724137931034]]
+        df = pd.DataFrame(lst, columns =["meanfreq","sd","median","Q25","Q75","IQR","skew","kurt","sp.ent","sfm","mode","centroid","meanfun","minfun","maxfun","meandom","mindom","maxdom","dfrange","modindx"], dtype = float)
+        df.to_csv('/home/sparsh/pyvscode/Major_Project/GenderPredict-main/my_voice.csv',index=False)
+
 
 upload_frame = Frame(root,borderwidth=2)
 upload_frame.pack()
